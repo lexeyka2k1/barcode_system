@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Регистрация пользователя - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <!-- Меню будет заполнено через JavaScript -->
+        </ul>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Регистрация нового пользователя</h1>
+            <p>Заполните форму для создания учетной записи</p>
+        </div>
+
+        <div class="registration-form">
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">Наименование пользователя:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="key">Уникальный идентификатор:</label>
+                    <input type="text" id="key" name="user-id" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login">Логин:</label>
+                    <input type="text" id="login" name="login" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="databases">Доступные базы данных (через запятую):</label>
+                    <input type="text" id="databases" name="databases"
+                           placeholder="Например: 1,2,3 ">
+                    <small class="hint">Укажите номера или названия БД через запятую</small>
+                </div>
+
+                <div class="form-group" id="role-selector" style="display: none;">
+                    <label for="role">Роль пользователя:</label>
+                    <select id="role" name="role" required>
+                        <option value="USER">Пользователь</option>
+                        <option value="ADMIN">Администратор</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary">Зарегистрировать</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script src="menu.js"></script>
+<script src="setting.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const institutionKey = localStorage.getItem('institutionKey');
+        if (!institutionKey) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Проверяем роль текущего пользователя
+        try {
+            const response = await fetch(`/api/v1/institutions/${institutionKey}`, {
+                headers: {
+                    'Authorization': institutionKey
+                }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                if (user.role === 'ADMIN') {
+                    document.getElementById('role-selector').style.display = 'block';
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при проверке роли:', error);
+        }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('username').value;
+        const key = document.getElementById('key').value;
+        const login = document.getElementById('login').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role')?.value || 'USER';
+        const authToken = localStorage.getItem('institutionKey');
+        const databasesInput = document.getElementById('databases').value;
+    // Преобразуем в массив (удаляем пробелы и пустые значения)
+    const availableDatabases = databasesInput.split(',')
+        .map(db => db.trim())
+        .filter(db => db.length > 0);
+
+        try {
+            const institution = {
+                key: key,
+                name: name,
+                login: login,
+                password: password,
+                availableDatabases: availableDatabases,
+                role: role
+
+            };
+
+            const response = await fetch('/api/v1/institutions/save_institution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken
+                },
+                body: JSON.stringify(institution)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                let errorMessage = 'Произошла ошибка при регистрации';
+
+                if (response.status === 400) {
+                    errorMessage = 'Неверно заполнены данные. Проверьте все поля.';
+                } else if (response.status === 403) {
+                    errorMessage = 'Недостаточно прав для создания пользователя';
+                    window.location.href = 'index.html';
+                } else if (response.status === 409) {
+                    errorMessage = 'Пользователь с таким логином или идентификатором уже существует';
+                } else if (response.status === 500) {
+                    errorMessage = 'Повторяющийся уникальный идентификатор.';
+                }
+
+                if (errorData.message) {
+                    errorMessage += `\nДетали: ${errorData.message}`;
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            alert('Регистрация прошла успешно!');
+
+            // Если регистрирует администратор - остаемся на странице
+            if (role === 'ADMIN') {
+                document.getElementById('register-form').reset();
+            } else {
+                window.location.href = 'personnel.html';
+            }
+        } catch (error) {
+            console.error('Ошибка при регистрации:', error);
+            alert(error.message || 'Произошла неизвестная ошибка при регистрации. Пожалуйста, попробуйте еще раз.');
+        }
+    });
+
+    function logout() {
+        localStorage.removeItem('institutionKey');
+        localStorage.removeItem('institutionName');
+        window.location.href = 'login.html';
+    }
+
+    function toggleMenu() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('active');
+    }
+
+
+</script>
+
+<style>
+
+    .database-selector {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.database-label {
+    margin-right: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+    #role-selector {
+    margin: 15px 0;
+}
+
+#role {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.active {
+    transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1000;
+        background: white;
+    }
+
+    .menu-button {
+        display: block;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1100;
+    }
+}
+</style>
+</body>
+</html>

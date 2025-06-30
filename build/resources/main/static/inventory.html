@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Маркировка - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+
+<style>
+
+    /* Стили для выбора базы данных */
+.database-selector {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.database-label {
+    margin-right: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.database-select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.database-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+</style>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <!-- Меню будет заполнено через JavaScript -->
+        </ul>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Инвентаризация</h1>
+            <p>Выберите тип инвентаризации</p>
+        </div>
+
+        <div class="marking-options">
+            <div class="option-card" onclick="location.href='inventory-short.html'">
+                <h3>Стандартная инвентаризация</h3>
+                <p>Система считывает штрих-коды и отображает только инвентарные номера</p>
+            </div>
+
+            <div class="option-card" onclick="location.href='inventory-extend.html'">
+                <h3>Расширенная инвентаризация</h3>
+                <p>Система отображает как инвентарные номера, так и наименование документов</p>
+            </div>
+        </div>
+
+
+    </main>
+</div>
+
+<script src="menu.js"></script>
+<script src="setting.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+const institutionKey = localStorage.getItem('institutionKey');
+if (!institutionKey) {
+    window.location.href = 'login.html';
+    return;
+}
+  });
+
+    function toggleMenu() {
+const sidebar = document.getElementById('sidebar');
+sidebar.classList.toggle('collapsed');
+}
+       function logout() {
+// Очищаем все данные авторизации
+localStorage.removeItem('institutionKey');
+localStorage.removeItem('institutionName');
+
+// Перенаправляем на страницу входа
+window.location.href = 'login.html';
+}
+
+</script>
+</body>
+</html>

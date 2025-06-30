@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Маркировка - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+	<link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+	  <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <ul class="menu">
+                <!-- Меню будет заполнено через JavaScript -->
+            </ul>
+        </nav>
+    
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+		
+        <main class="content">
+            <div class="header">
+                <h1>Маркировка документов</h1>
+                <p>Выберите тип маркировки</p>
+            </div>
+            
+            <div class="marking-options">
+                <div class="option-card" onclick="location.href='auto-marking.html'">
+                    <h3>Автоматическое формирование</h3>
+                    <p>Система автоматически сгенерирует штрих-коды по заданным параметрам</p>
+                </div>
+                
+                <div class="option-card" onclick="location.href='manual-marking.html'">
+                    <h3>Ручное формирование</h3>
+                    <p>Ввод штрих-кодов вручную для отдельных документов</p>
+                </div>
+            </div>
+            
+            
+        </main>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="setting.js"></script>
+ 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        window.location.href = 'login.html';
+        return;
+    }
+      });
+
+		
+		function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+           function logout() {
+    // Очищаем все данные авторизации
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+
+    // Перенаправляем на страницу входа
+    window.location.href = 'login.html';
+}
+
+    </script>
+</body>
+</html>

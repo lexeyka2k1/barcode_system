@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр пользователей - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+
+</head>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <!-- Меню будет заполнено через JavaScript -->
+        </ul>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Просмотр всех пользователей</h1>
+            <p>Список зарегистрированных пользователей системы</p>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>ID</th>
+                    <th>Наименование</th>
+                    <th>Логин</th>
+                    <th>Пароль</th>
+                    <th>Доступные БД</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="users-table-body">
+                <!-- Данные будут загружаться динамически -->
+                </tbody>
+            </table>
+
+            <div class="table-actions">
+                <button onclick="window.location.href='registration.html'">Добавить пользователя</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal-content">
+        <h3 class="modal-title" id="modal-title">Подтверждение удаления</h3>
+        <p class="modal-message" id="modal-message"></p>
+        <div class="modal-actions">
+            <button class="modal-button secondary" id="cancel-delete">Отмена</button>
+            <button class="modal-button primary" id="confirm-delete">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<script src="menu.js"></script>
+<script src="setting.js"></script>
+<script>
+    const databaseDescriptions = {
+    1: "Книги, АВ, электронные издания (РОУНБ)",
+    5: "БД Ноты",
+    6: "Журналы и газеты",
+    20: "Оригинальная литература на иностранных языках",
+    21: "До 2012. Иностранная литература",
+    25: "Дореволюционная периодика",
+    26: "Франко-немецкий читальный зал",
+    31: "Рязанская область: страницы истории",
+    110: "ЭК РОДБ",
+    111: "Ноты РОДБ",
+    113: "Редкие книги РОДБ",
+    115: "Спецбиблиотека",
+    151: "Художественный музей",
+    152: "Рязанская духовная семинария",
+    153: "Касимовская епархия",
+    154: "Свято-Троицкий мужской монастырь города Рязани",
+    201: "ЦБ Шиловского района",
+    202: "ЦБ Шацкого района",
+    203: "ЦБ Спасского района",
+    204: "ЦБ Рязанского района",
+    205: "ЦБ Ряжского района",
+    206: "ЦБ Рыбновского района",
+    207: "ЦБ Клепиковского района",
+    208: "ЦБ Старожиловского района",
+    209: "ЦБ Пронского района",
+    210: "ЦБ Ухоловского района",
+    211: "ЦБ Скопинского района",
+    212: "ЦБ Михайловского района",
+    213: "ЦБ Касимовского района",
+    214: "ЦБ Сасовского района",
+    215: "ЦБ Кадомского района",
+    216: "ЦБ г.Касимова",
+    217: "ЦБ Кораблинского района",
+    218: "ЦБ Александро-Невского района",
+    219: "ЦБ Путятинского района",
+    220: "ЦБ Чучковского района",
+    221: "ЦБ Пителинского района",
+    222: "ЦБ Сапожковского района",
+    223: "ЦБ Захаровского района",
+    224: "ЦБ Милославского района",
+    225: "ЦБ Ермишенского района",
+    226: "ЦБ Сараевского района",
+    227: "Новомичуринская гор.библ.",
+    228: "ЦБ г. Сасово",
+    229: "ДК г. Скопин",
+    300: "Учебная БД",
+    301: "ЭБ Шилово"
+};
+
+function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+// Основная функция инициализации
+document.addEventListener('DOMContentLoaded', async function() {
+    // Загрузка пользователей при открытии страницы
+    await loadUsers();
+
+    // Инициализация функционала таблицы
+    initUserTable();
+});
+
+// Загрузка пользователей с сервера
+async function loadUsers() {
+    try {
+        const institutionKey = localStorage.getItem('institutionKey');
+        if (!institutionKey) {
+            alert('Отсутствует ключ учреждения. Повторите вход.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const response = await fetch('/api/v1/institutions', {
+            method: 'GET',
+            headers: {
+                'Authorization': institutionKey
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки пользователей');
+        }
+
+        const users = await response.json();
+        renderUsers(users);
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Не удалось загрузить пользователей: ' + error.message);
+    }
+}
+
+// Отрисовка пользователей в таблице
+function renderUsers(users) {
+    const tbody = document.querySelector('.users-table tbody');
+    tbody.innerHTML = '';
+
+    users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${user.key}</td>
+            <td>${user.name || ''}</td>
+            <td>${user.login || ''}</td>
+            <td>••••••••</td>
+            <td>
+                <div class="custom-db-select" data-user-key="${user.key}">
+                    <div class="db-display">${getFirstDbDisplay(user.availableDatabases)}</div>
+                    <div class="db-dropdown">
+                        ${renderDatabaseOptions(user.availableDatabases)}
+                        <div class="add-db-container">
+                            <input type="text" class="add-db-input" placeholder="Добавить БД"
+                                   data-user-key="${user.key}">
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <button class="action-button delete">Удалить</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    addDeleteHandlers();
+    initCustomDbSelects();
+}
+
+function getFirstDbDisplay(databases) {
+    if (!databases || databases.length === 0) {
+        return 'Нет доступа';
+    }
+    return databases[0] + (databases.length > 1 ? ` (+${databases.length - 1})` : '');
+}
+
+function renderDatabaseOptions(databases) {
+    if (!databases || databases.length === 0) {
+        return '<div class="no-dbs">Нет доступных БД</div>';
+    }
+
+    // Сортируем БД по номеру
+    const sortedDbs = [...databases]
+        .map(db => parseInt(db))
+        .filter(db => !isNaN(db))
+        .sort((a, b) => a - b);
+
+    return sortedDbs.map(db => {
+        const description = databaseDescriptions[db] || "Описание отсутствует";
+        return `
+            <div class="db-item">
+                <span>${db} - ${description}</span>
+                <span class="delete-db" data-db="${db}">×</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Инициализация кастомных выпадающих списков
+function initCustomDbSelects() {
+    document.querySelectorAll('.custom-db-select').forEach(select => {
+        const display = select.querySelector('.db-display');
+        const dropdown = select.querySelector('.db-dropdown');
+        const userKey = select.getAttribute('data-user-key');
+
+        // Открытие/закрытие списка
+        display.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Обработка клика по удалению БД
+        dropdown.querySelectorAll('.delete-db').forEach(deleteBtn => {
+            deleteBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const dbToRemove = this.getAttribute('data-db');
+                await updateUserDatabases(userKey, dbToRemove, 'remove');
+            });
+        });
+
+        // Обработка ввода новых БД
+        const addDbInput = dropdown.querySelector('.add-db-input');
+        addDbInput.addEventListener('keydown', async function(e) {
+            if (e.key === 'Enter') {
+                const dbsToAdd = this.value.split(',')
+                    .map(db => db.trim())
+                    .filter(db => db.length > 0);
+
+                if (dbsToAdd.length > 0) {
+                    await updateUserDatabases(userKey, dbsToAdd, 'add');
+                    this.value = '';
+                }
+            }
+        });
+    });
+
+    // Закрытие выпадающих списков при клике вне их
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.custom-db-select').forEach(select => {
+            if (!select.contains(e.target)) {
+                const dropdown = select.querySelector('.db-dropdown');
+                dropdown.classList.remove('show');
+            }
+        });
+    });
+}
+
+// Обновление списка БД пользователя
+async function updateUserDatabases(userKey, databases, action) {
+    try {
+        const institutionKey = localStorage.getItem('institutionKey');
+        if (!institutionKey) {
+            alert('Отсутствует ключ авторизации. Пожалуйста, войдите в систему.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const response = await fetch(`/api/v1/institutions/update_databases/${userKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': institutionKey
+            },
+            body: JSON.stringify({
+                databases: Array.isArray(databases) ? databases : [databases],
+                action: action // 'add' или 'remove'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка при обновлении списка БД');
+        }
+
+        // Перезагружаем список пользователей
+        await loadUsers();
+    } catch (error) {
+        console.error('Ошибка обновления БД:', error);
+        alert('Не удалось обновить список БД: ' + error.message);
+    }
+}
+
+// Добавление обработчиков для кнопок удаления
+function addDeleteHandlers() {
+    document.querySelectorAll('.action-button.delete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const row = this.closest('tr');
+            const keyCell = row.querySelector('td:nth-child(2)'); // Ячейка с ключом
+            const userKey = keyCell.textContent;
+
+            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                try {
+                    await deleteUser(userKey);
+                    await loadUsers(); // Перезагружаем список после удаления
+                } catch (error) {
+                    console.error('Ошибка удаления:', error);
+                    alert(`Не удалось удалить пользователя: ${error.message}`);
+                }
+            }
+        });
+    });
+}
+
+// Функция удаления пользователя
+async function deleteUser(userKey) {
+    const institutionKey = localStorage.getItem('institutionKey');
+
+    if (!institutionKey) {
+        alert('Отсутствует ключ авторизации. Пожалуйста, войдите в систему.');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/v1/institutions/delete_institution/${userKey}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': institutionKey,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка при удалении пользователя');
+        }
+
+        await loadUsers();
+    } catch (error) {
+        console.error('Ошибка удаления:', error);
+        alert('Не удалось удалить пользователя: ' + error.message);
+    }
+}
+
+// Функция выхода
+function logout() {
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+    window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

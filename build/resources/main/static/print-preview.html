@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Предпросмотр печати - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style"/>
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled/>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        /* Основные стили */
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .print-actions {
+            margin: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .print-action-button {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .print-action-button.secondary {
+            background: var(--secondary-color);
+        }
+
+        /* Стили для листа A4 */
+        .a4-sheet {
+            width: 210mm;
+            height: 297mm;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Общие стили */
+.barcode-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    width: 195mm;              /* было 100% */
+    height: 280mm;             /* чуть меньше A4 */
+    padding: 5mm;
+    box-sizing: border-box;
+    gap: 0;
+    margin: 0 auto;
+}
+
+.barcode-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #888;
+    padding: 1mm;
+    box-sizing: border-box;
+    position: relative;
+    page-break-inside: avoid;
+    overflow: hidden;
+}
+
+.barcode-svg {
+    width: 100%;
+    height: 20mm;
+    margin: 0 auto;
+}
+
+.barcode-text {
+    margin-top: 1mm;
+    font-size: 11pt;
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.2;
+}
+
+/* Печать */
+@media print {
+    body, html {
+        margin: 0;
+        padding: 0;
+    }
+
+    .a4-sheet {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        width: 210mm;
+        height: 297mm;
+    }
+
+    .barcode-grid {
+        width: 195mm !important;
+        height: 280mm !important;
+        padding: 5mm;
+        gap: 0 !important;
+    }
+
+    .barcode-cell {
+        border: 1px dashed black !important;
+        padding: 1mm;
+    }
+
+    .barcode-svg {
+        height: 20mm !important;
+        width: 100% !important;
+    }
+
+    .barcode-text {
+        font-size: 12pt !important;
+    }
+}
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <!-- Меню будет заполнено через JavaScript -->
+        </ul>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Предпросмотр печати</h1>
+            <p>Список номеров для печати (40 штрих-кодов на листе)</p>
+        </div>
+
+        <div class="print-preview-container">
+            <div class="a4-sheet">
+                <div class="barcode-grid" id="barcode-grid"></div>
+            </div>
+
+            <div class="print-actions">
+                <button onclick="printBarcodes()" class="print-action-button">Печать</button>
+                <button class="primary" onclick="window.location.href='marking.html'">Назад</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="menu.js"></script>
+<script src="setting.js"></script>
+<script>
+
+ /*   document.addEventListener('DOMContentLoaded', () => {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'light') {
+              document.getElementById('light-theme').disabled = false;
+              document.getElementById('main-style').disabled = true;
+          }
+      }); */
+
+
+
+
+  if (!localStorage.getItem('institutionKey')) {
+      window.location.href = 'login.html';
+  }
+
+  function generateBarcodeSVG(text) {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+
+    // Добавляем фоновый прямоугольник для четкости
+    const rect = document.createElementNS(ns, "rect");
+    rect.setAttribute("width", "100%");
+    rect.setAttribute("height", "100%");
+    rect.setAttribute("fill", "white");
+    svg.appendChild(rect);
+
+    JsBarcode(svg, text, {
+        format: "CODE128",
+        displayValue: false,
+        height: 40,
+        width: 1.5,
+        margin: 0,
+        background: "white" // Белый фон для печати
+    });
+
+    return svg;
+}
+
+function printBarcodes() {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Печать штрих-кодов</title>
+                <style>
+                    ${document.querySelector('style').innerHTML}
+                    .a4-sheet { margin: 0; box-shadow: none; }
+                </style>
+            </head>
+            <body>${document.getElementById('barcode-grid').outerHTML}</body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const numbersJson = params.get('numbers');
+      const grid = document.getElementById('barcode-grid');
+
+      if (!numbersJson) return;
+
+      const numbers = JSON.parse(decodeURIComponent(numbersJson));
+
+      // Заполняем 40 ячеек (4x10)
+      for (let i = 0; i < 40; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'barcode-cell';
+
+          const num = numbers[i] || ''; // Если кодов меньше 40, оставшиеся будут пустыми
+          const svg = num ? generateBarcodeSVG(num) : document.createElement('div');
+
+          const text = document.createElement('div');
+          text.className = 'barcode-text';
+          text.textContent = num;
+
+          cell.appendChild(svg);
+          cell.appendChild(text);
+          grid.appendChild(cell);
+      }
+  });
+
+  function toggleMenu() {
+      document.getElementById("sidebar").classList.toggle("collapsed");
+  }
+
+     function logout() {
+  // Очищаем все данные авторизации
+  localStorage.removeItem('institutionKey');
+  localStorage.removeItem('institutionName');
+
+  // Перенаправляем на страницу входа
+  window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

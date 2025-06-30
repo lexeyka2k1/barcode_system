@@ -1,0 +1,144 @@
+/* high-contrast.css - Высококонтрастная тема для слабовидящих */
+:root {
+  /* Цветовая палитра с максимальным контрастом */
+  --bg-color: #000000;
+  --text-color: #ffff00;
+  --sidebar-bg: #000000;
+  --menu-item-bg: #222222;
+  --menu-item-hover: #444444;
+  --menu-item-active: #cc00cc;
+  --content-bg: #000000;
+  --card-bg: #111111;
+  --card-hover: #222222;
+  --border-color: #ffff00;
+  --primary-color: #cc00cc;
+  --primary-hover: #00cccc;
+  --secondary-color: #cc00cc;
+  --secondary-hover: #00cccc;
+  --warning-color: #ff9900;
+  --error-color: #ff0000;
+  --input-bg: #000000;
+  --input-border: #ffff00;
+  --shadow-color: rgba(255, 255, 0, 0.3);
+  --modal-bg: #111111;
+  --text-muted: #aaaa00;
+}
+
+
+
+/* Базовые стили для темы */
+body.high-contrast {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+
+  /* Чёрная обводка текста для улучшения читаемости */
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+.menu li a {
+    color: #ffff00;
+    text-decoration: none;
+    display: block;
+}
+
+.menu li a:hover {
+    color: #cc00cc;
+}
+
+.menu a.active {
+  background: var(--menu-item-active);
+  color: #ffff00;
+}
+
+/* Альтернативная обводка для Chromium-браузеров */
+body.high-contrast .outlined-text {
+  -webkit-text-stroke: 1px black;
+  color: var(--text-color);
+}
+
+/* Ссылки */
+body.high-contrast a {
+  color: #00ffff !important;
+}
+
+/* Кнопки и интерактивные элементы */
+body.high-contrast button,
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+/* Активные элементы */
+body.high-contrast .menu a.active {
+  color: #000000 !important;
+  background-color: var(--menu-item-active) !important;
+}
+
+/* Основные кнопки */
+body.high-contrast button.primary,
+body.high-contrast .modal-button.primary,
+body.high-contrast .print-button,
+body.high-contrast .add-button {
+  color: #000000 !important;
+  background-color: var(--primary-color) !important;
+  border: 2px solid var(--primary-color) !important;
+}
+
+/* Фокус на элементах форм */
+body.high-contrast input:focus,
+body.high-contrast .number-input:focus,
+body.high-contrast select:focus {
+  box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.5) !important;
+  outline: none !important;
+}
+
+/* Карточки и контейнеры */
+body.high-contrast .option-card,
+body.high-contrast .form-container,
+body.high-contrast .numbers-grid,
+body.high-contrast .feature-card,
+body.high-contrast .inventory-info,
+body.high-contrast .guide-section {
+  border: 2px solid var(--border-color) !important;
+}
+
+/* Границы акцентных элементов */
+body.high-contrast .number-card,
+body.high-contrast .option-card {
+  border-left: 4px solid var(--primary-color) !important;
+}
+
+/* Переключатели */
+body.high-contrast .scan-mode-slider {
+  background-color: var(--menu-item-bg) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+body.high-contrast .scan-mode-slider:before {
+  background-color: var(--text-color) !important;
+}
+
+/* Модальные окна */
+body.high-contrast .modal-content {
+  border: 2px solid var(--primary-color) !important;
+}
+
+/* Сообщения об ошибках */
+body.high-contrast .warning-message {
+  color: var(--warning-color) !important;
+  font-weight: bold !important;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  body.high-contrast .sidebar {
+    border-right: 2px solid var(--border-color) !important;
+  }
+}

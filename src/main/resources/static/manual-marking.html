@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Ручная маркировка - СИУБФ</title>
+	
+	
+    <link rel="stylesheet" href="styles.css" id="main-style">
+<link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <ul class="menu">
+                <!-- Меню будет заполнено через JavaScript -->
+            </ul>
+        </nav>
+		
+		 <button class="menu-button" onclick="toggleMenu()">☰</button>
+	
+		
+        <main class="content">
+            <div class="header">
+                <h1>Ручная маркировка</h1>
+                <p>Введите инвентарные номера для печати</p>
+            </div>
+            
+            <div class="manual-marking-container">
+                <div class="action-buttons-container">
+                    <button id="clear-button" class="clear-button">Очистить все</button>
+                    <button id="print-button" class="print-button">Печать</button>
+                </div>
+                
+                <div id="warning" class="warning-message" style="display: none;">
+                    Внимание: Добавлено менее 40 номеров. На листе останутся пустые места.
+                </div>
+                
+                <div id="numbers-grid" class="numbers-grid"></div>
+                
+                <div class="input-footer">
+                    <input type="text" id="number-input" class="number-input" placeholder="Введите инвентарный номер" maxlength="7">
+                    <button id="add-button" class="add-button">Добавить</button>
+                    <div class="counter"><span id="count">0</span>/40</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Модальное окно дубликата -->
+    <div id="duplicate-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">Дубликат номера</h3>
+            <p class="modal-message" id="duplicate-message">Этот номер уже был добавлен ранее.</p>
+            <div class="modal-actions">
+                <button id="cancel-btn" class="modal-button secondary">Отмена</button>
+                <button id="continue-btn" class="modal-button primary">Продолжить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="setting.js"></script>
+	
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        window.location.href = 'login.html';
+        return;
+    }
+       });
+
+       document.addEventListener('DOMContentLoaded', function() {
+    // Получаем все необходимые элементы DOM
+    const numberInput = document.getElementById('number-input');
+    const addButton = document.getElementById('add-button');
+    const clearButton = document.getElementById('clear-button');
+    const printButton = document.getElementById('print-button');
+    const numbersGrid = document.getElementById('numbers-grid');
+    const warningElement = document.getElementById('warning');
+    const countElement = document.getElementById('count');
+    const duplicateModal = document.getElementById('duplicate-modal');
+    const duplicateMessage = document.getElementById('duplicate-message');
+    const continueBtn = document.getElementById('continue-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    
+    // Массив для хранения введенных номеров
+    let numbers = [];
+    // Переменная для хранения дублированного номера
+    let duplicateNumber = '';
+    
+    // Загружаем сохраненные номера из localStorage
+    loadNumbers();
+    
+    // Назначаем обработчики событий
+    addButton.addEventListener('click', processInput);
+    clearButton.addEventListener('click', clearAll);
+    printButton.addEventListener('click', printNumbers);
+    numberInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') processInput();
+    });
+    continueBtn.addEventListener('click', confirmDuplicate);
+    cancelBtn.addEventListener('click', cancelDuplicate);
+    
+    // Основная функция обработки ввода
+    function processInput() {
+        const number = numberInput.value.trim();
+        
+        // Проверяем, что поле не пустое
+        if (!number) return;
+
+        if (number.length > 7) {
+        alert('Инвентарный номер не должен превышать 7 символов');
+        return;
+        }
+        
+        // Проверяем на дубликат
+        if (numbers.includes(number)) {
+            showDuplicateModal(number);
+            return;
+        }
+        
+        // Добавляем номер
+        addNumber(number);
+    }
+    
+    // Функция добавления номера
+    function addNumber(number) {
+        // Проверяем лимит
+        if (numbers.length >= 40) {
+            alert('Достигнуто максимальное количество номеров (40)');
+            return;
+        }
+        
+        // Добавляем номер в массив
+        numbers.push(number);
+        
+        // Сохраняем, отрисовываем и обновляем интерфейс
+        saveNumbers();
+        renderNumbers();
+        updateInterface();
+        
+        // Очищаем поле ввода и устанавливаем фокус
+        numberInput.value = '';
+        numberInput.focus();
+    }
+    
+    // Функция очистки всех номеров
+    function clearAll() {
+        if (numbers.length === 0) return;
+        
+        if (confirm('Вы уверены, что хотите очистить все номера?')) {
+            numbers = [];
+            saveNumbers();
+            renderNumbers();
+            updateInterface();
+        }
+    }
+    
+    // Функция печати
+     function printNumbers() {
+        if (numbers.length === 0) {
+            alert('Добавьте хотя бы один номер для печати');
+            return;
+        }
+
+        // Получаем ID учреждения
+        const institutionKey = localStorage.getItem('institutionKey');
+        if (!institutionKey) {
+            alert('Ошибка: ID учреждения не найден');
+            return;
+        }
+
+        // Добавляем ID учреждения к каждому номеру
+        const numbersWithId = numbers.map(num => {
+            // Проверяем, не добавлен ли уже ID (на случай повторной печати)
+            if (num.startsWith(institutionKey)) {
+                return num;
+            }
+            return institutionKey + String(num).padStart(7, '0');
+        });
+
+        // Переходим на страницу предпросмотра печати
+        window.location.href = 'print-preview.html?numbers=' + encodeURIComponent(JSON.stringify(numbersWithId));
+    }
+    
+    // Функция отрисовки номеров
+    function renderNumbers() {
+        // Очищаем сетку
+        numbersGrid.innerHTML = '';
+        
+        // Создаем карточки для каждого номера
+        numbers.forEach((num, index) => {
+            const card = document.createElement('div');
+            card.className = 'number-card';
+            card.innerHTML = `
+                ${num}
+                <button class="remove-number" data-index="${index}">
+                    <span class="remove-icon">×</span>
+                </button>
+            `;
+            numbersGrid.appendChild(card);
+        });
+        
+        // Назначаем обработчики удаления
+        setupRemoveHandlers();
+    }
+    
+    // Функция настройки обработчиков удаления
+    function setupRemoveHandlers() {
+        document.querySelectorAll('.remove-number').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const index = parseInt(e.target.closest('button').getAttribute('data-index'));
+                numbers.splice(index, 1);
+                saveNumbers();
+                renderNumbers();
+                updateInterface();
+            });
+        });
+    }
+    
+    // Функция показа модального окна дубликата
+    function showDuplicateModal(number) {
+        duplicateNumber = number;
+        duplicateMessage.textContent = `Номер "${number}" уже существует в списке.`;
+        duplicateModal.classList.add('active');
+    }
+    
+    // Функция подтверждения дубликата
+    function confirmDuplicate() {
+        duplicateModal.classList.remove('active');
+        addNumber(duplicateNumber);
+    }
+    
+    // Функция отмены дубликата
+    function cancelDuplicate() {
+        duplicateModal.classList.remove('active');
+        numberInput.value = duplicateNumber;
+        numberInput.focus();
+    }
+    
+    // Функция обновления интерфейса
+    function updateInterface() {
+        updateCounter();
+        updateWarning();
+        updateAddButton();
+        numberInput.focus();
+    }
+    
+    // Функция обновления счетчика
+    function updateCounter() {
+        countElement.textContent = numbers.length;
+    }
+    
+    // Функция обновления предупреждения
+    function updateWarning() {
+        warningElement.style.display = (numbers.length > 0 && numbers.length < 40) ? 'block' : 'none';
+    }
+    
+    // Функция обновления кнопки добавления
+    function updateAddButton() {
+        addButton.disabled = numbers.length >= 40;
+    }
+    
+    // Функция сохранения номеров в localStorage
+    function saveNumbers() {
+        localStorage.setItem('manualMarkingNumbers', JSON.stringify(numbers));
+    }
+    
+    // Функция загрузки номеров из localStorage
+    function loadNumbers() {
+        const saved = localStorage.getItem('manualMarkingNumbers');
+        if (saved) {
+            numbers = JSON.parse(saved);
+            renderNumbers();
+            updateInterface();
+        }
+    }
+});
+
+function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+           function logout() {
+    // Очищаем все данные авторизации
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+
+    // Перенаправляем на страницу входа
+    window.location.href = 'login.html';
+}
+
+    </script>
+	
+	
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Расширенная инвентаризация - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+            <ul class="menu">
+                <!-- Меню будет заполнено через JavaScript -->
+            </ul>
+        </nav>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Расширенная инвентаризация фонда</h1>
+            <p>Сканируйте штрих-коды документов для получения полной информации</p>
+        </div>
+
+        <div class="inventory-container">
+            <!-- Информационный блок -->
+            <div class="inventory-info">
+                <p>Всего отсканировано: <span id="total-scanned">0</span> документов</p>
+            </div>
+
+            <!-- Контейнер с элементами управления -->
+            <div class="scan-controls">
+                <!-- Переключатель режима сканирования -->
+                <div class="scan-mode-container">
+                    <span class="scan-mode-label">Режим сканирования:</span>
+                    <label class="scan-mode-switch">
+                        <input type="checkbox" id="auto-scan-toggle">
+                        <span class="scan-mode-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Кнопки действий -->
+                <div class="action-buttons-container">
+                    <button id="clear-button" class="clear-button">Очистить</button>
+                    <button id="export-button" class="print-button">Экспорт</button>
+                </div>
+
+                <!-- Вставьте этот блок в раздел scan-controls -->
+                <div class="database-selector">
+                    <span class="database-label">База данных:</span>
+                    <select id="database-select" class="database-select">
+                        <!-- Опции будут заполнены через JavaScript -->
+
+                    </select>
+                </div>
+            </div>
+
+            <!-- Таблица с отсканированными номерами и названиями -->
+            <div class="inventory-table-container">
+                <table class="inventory-table" id="inventory-table">
+                    <thead>
+                    <tr>
+                        <th>Инвентарный номер</th>
+                        <th>Название документа</th>
+                        <th><!-- Пустой заголовок для кнопки удаления --></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Здесь будут появляться строки с данными -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Панель ввода -->
+            <div class="input-footer">
+                <input type="text"
+                       id="number-input"
+                       class="number-input"
+                       placeholder="Введите номер вручную или сканируйте"
+                       autofocus>
+                <button id="add-button" class="add-button">Добавить</button>
+                <span class="counter"><span id="items-count">0</span> шт.</span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Модальное окно экспорта -->
+<div class="modal-overlay" id="export-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Экспорт данных</h3>
+        <div class="modal-message">
+            <p>Выберите формат и содержание для экспорта:</p>
+            <div style="margin-top: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <strong>Формат экспорта:</strong>
+                    <label style="display: block; margin-top: 5px; margin-bottom: 10px;">
+                        <input type="radio" name="export-format" value="csv" checked> CSV (Excel)
+                    </label>
+                    <label style="display: block; margin-bottom: 10px;">
+                        <input type="radio" name="export-format" value="txt"> Текстовый файл
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="export-format" value="json"> JSON
+                    </label>
+                </div>
+                <div>
+                    <strong>Содержание экспорта:</strong>
+                    <label style="display: block; margin-top: 5px; margin-bottom: 10px;">
+                        <input type="radio" name="export-content" value="full" checked> Полные данные (номер + название)
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="export-content" value="numbers"> Только инвентарные номера
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-button secondary" onclick="closeExportModal()">Отмена</button>
+            <button class="modal-button primary" onclick="exportData()">Экспорт</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно дубликата -->
+<div class="modal-overlay" id="duplicate-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Дубликат штрих-кода</h3>
+        <div class="modal-message">
+            <p>Штрих-код <strong id="duplicate-number"></strong> уже был отсканирован ранее.</p>
+            <p>Хотите проверить этот штрих-код в системе?</p>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-button secondary" onclick="closeDuplicateModal()">Отмена</button>
+            <button class="modal-button primary" onclick="checkBarcode()">Проверить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно загрузки -->
+<div class="modal-overlay" id="loading-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Загрузка данных</h3>
+        <div class="modal-message">
+            <p>Идет получение информации о документе...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+</div>
+
+
+<script src="menu.js"></script>
+<script src="setting.js"></script>
+
+<script>
+
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const institutionKey = localStorage.getItem('institutionKey');
+        if (!institutionKey) {
+            window.location.href = 'login.html';
+            return;
+        }
+         loadAvailableDatabases();
+    });
+
+
+    // Переменные
+    const scannedItems = new Map(); // Хранит инвентарные номера и названия
+    const inventoryTable = document.getElementById('inventory-table').getElementsByTagName('tbody')[0];
+    const numberInput = document.getElementById('number-input');
+    const addButton = document.getElementById('add-button');
+    const clearButton = document.getElementById('clear-button');
+    const exportButton = document.getElementById('export-button');
+    const itemsCount = document.getElementById('items-count');
+    const totalScanned = document.getElementById('total-scanned');
+    const autoScanToggle = document.getElementById('auto-scan-toggle');
+    const exportModal = document.getElementById('export-modal');
+    const duplicateModal = document.getElementById('duplicate-modal');
+    const loadingModal = document.getElementById('loading-modal');
+    const duplicateNumberEl = document.getElementById('duplicate-number');
+
+    // Текущий дублирующийся номер (для модального окна)
+    let duplicateNumber = '';
+
+    // Переключение меню
+    function toggleMenu() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    }
+
+    // Функция для получения названия документа из XML
+    async function fetchDocumentTitle(inventoryNumber) {
+    try {
+        const response = await fetch(`/api/documents/info?inventoryNumber=${encodeURIComponent(inventoryNumber)}&database=${selectedDatabase}`, {
+            headers: {
+                'Authorization': localStorage.getItem('institutionKey')
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка сервера');
+        }
+
+        const data = await response.json();
+        return data.title;
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+        return "Ошибка загрузки названия";
+    }
+}
+
+let selectedDatabase = null;
+const databaseDescriptions = {
+    1: "Книги, АВ, электронные издания (РОУНБ)",
+    5: "БД Ноты",
+    6: "Журналы и газеты",
+    20: "Оригинальная литература на иностранных языках",
+    21: "До 2012. Иностранная литература",
+    25: "Дореволюционная периодика",
+    26: "Франко-немецкий читальный зал",
+    110: "ЭК РОДБ",
+    111: "Ноты РОДБ",
+    113: "Редкие книги РОДБ",
+    115: "Спецбиблиотека",
+    151: "Художественный музей",
+    152: "Рязанская духовная семинария",
+    153: "Касимовская епархия",
+    154: "Свято-Троицкий мужской монастырь города Рязани",
+    201: "ЦБ Шиловского района",
+    202: "ЦБ Шацкого района",
+    203: "ЦБ Спасского района",
+    204: "ЦБ Рязанского района",
+    205: "ЦБ Ряжского района",
+    206: "ЦБ Рыбновского района",
+    207: "ЦБ Клепиковского района",
+    208: "ЦБ Старожиловского района",
+    209: "ЦБ Пронского района",
+    210: "ЦБ Ухоловского района",
+    211: "ЦБ Скопинского района",
+    212: "ЦБ Михайловского района",
+    213: "ЦБ Касимовского района",
+    214: "ЦБ Сасовского района",
+    215: "ЦБ Кадомского района",
+    216: "ЦБ г.Касимова",
+    217: "ЦБ Кораблинского района",
+    218: "ЦБ Александро-Невского района",
+    219: "ЦБ Путятинского района",
+    220: "ЦБ Чучковского района",
+    221: "ЦБ Пителинского района",
+    222: "ЦБ Сапожковского района",
+    223: "ЦБ Захаровского района",
+    224: "ЦБ Милославского района",
+    225: "ЦБ Ермишенского района",
+    226: "ЦБ Сараевского района",
+    227: "Новомичуринская гор.библ.",
+    228: "ЦБ г. Сасово",
+    229: "ДК г. Скопин",
+    300: "Учебная БД",
+
+};
+
+async function loadAvailableDatabases() {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        console.error('Ключ учреждения не найден');
+        return;
+    }
+
+    const select = document.getElementById('database-select');
+    if (!select) {
+        console.error('Элемент database-select не найден');
+        return;
+    }
+
+    try {
+        // 1. Получаем данные пользователя
+        const response = await fetch(`/api/v1/institutions/${institutionKey}`, {
+            headers: { 'Authorization': institutionKey }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const user = await response.json();
+        console.log('Данные пользователя:', user);
+
+        // Очищаем select
+        select.innerHTML = '';
+
+        // 2. Проверяем и обрабатываем доступные БД
+        if (!user.availableDatabases || user.availableDatabases.length === 0) {
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "Нет доступных баз";
+            select.appendChild(option);
+            select.disabled = true;
+            console.warn('У пользователя нет доступных баз данных');
+            return;
+        }
+
+        // 3. Сортируем и создаём опции с описаниями
+        const sortedDbs = [...user.availableDatabases]
+            .map(db => parseInt(db))
+            .filter(db => !isNaN(db))
+            .sort((a, b) => a - b);
+
+        sortedDbs.forEach(db => {
+            const option = document.createElement('option');
+            option.value = db;
+            // Добавляем описание из объекта databaseDescriptions
+            const description = databaseDescriptions[db] || "Описание отсутствует";
+            option.textContent = `${description}`;
+            option.title = description; // Подсказка при наведении
+            select.appendChild(option);
+        });
+
+        // 4. Устанавливаем значение по умолчанию
+        selectedDatabase = sortedDbs[0];
+        select.value = selectedDatabase;
+        console.log('Доступные базы данных загружены:', sortedDbs);
+
+        // 5. Обработчик изменения
+        select.addEventListener('change', (e) => {
+            selectedDatabase = parseInt(e.target.value);
+            console.log('Выбрана база данных:', selectedDatabase);
+        });
+
+    } catch (error) {
+        console.error('Ошибка при загрузке баз данных:', error);
+        select.innerHTML = '<option value="">Ошибка загрузки</option>';
+        select.disabled = true;
+    }
+}
+
+    // Добавление номера с получением названия
+    async function addNumber() {
+        const number = numberInput.value.trim();
+
+        if (!number) return;
+
+        if (!scannedItems.has(number)) {
+            // Показываем окно загрузки
+            loadingModal.classList.add('active');
+
+            try {
+                const title = await fetchDocumentTitle(number);
+                scannedItems.set(number, title);
+                renderItemRow(number, title);
+                updateCounters();
+                numberInput.value = '';
+
+                // Автофокус на поле ввода
+                if (autoScanToggle.checked) {
+                    numberInput.focus();
+                }
+            } finally {
+                loadingModal.classList.remove('active');
+            }
+        } else {
+            // Показываем модальное окно для дубликата
+            duplicateNumber = number;
+            duplicateNumberEl.textContent = number;
+            openDuplicateModal();
+        }
+    }
+
+    // Отрисовка строки с номером и названием
+    function renderItemRow(number, title) {
+        const row = document.createElement('tr');
+        row.className = 'inventory-row';
+        row.innerHTML = `
+            <td class="inventory-number">${number}</td>
+            <td class="document-title">${title}</td>
+        <td class="actions-cell"><button class="delete-btn" data-number="${number}">×</button></td>
+    `;
+
+        // Добавляем обработчик клика на строку для проверки в системе
+        row.addEventListener('click', function() {
+            checkBarcodeInSystem(number);
+        });
+
+        // Добавляем обработчик двойного клика для удаления
+      const deleteBtn = row.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', function(e) {
+        e.stopPropagation(); // Предотвращаем всплытие события
+        removeNumber(number);
+    });
+
+    inventoryTable.appendChild(row);
+}
+
+
+    // Функция проверки штрих-кода в системе (при клике на строку)
+    function checkBarcodeInSystem(barcode) {
+    const encodedBarcode = encodeURIComponent(barcode);
+    const checkUrl = `https://opac.rounb.ru/cgiopac/opacg/opac.exe?arg0=SIUBF&arg1=77aM4v7I&_searchstr=%2Fopacg%2Ffreesearch2.html%3Fiddb%3D${selectedDatabase}%26value%3DIN+${encodedBarcode}%27%27&TypeAccess=PayAccess`;
+    window.open(checkUrl, '_blank');
+}
+
+    // Функция удаления номера
+    function removeNumber(number) {
+        scannedItems.delete(number);
+        updateCounters();
+
+        // Удаляем строку из таблицы
+        const rows = inventoryTable.getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const numCell = rows[i].querySelector('.inventory-number');
+            if (numCell && numCell.textContent === number) {
+                inventoryTable.removeChild(rows[i]);
+                break;
+            }
+        }
+    }
+
+    function removeNumber(number) {
+    if (confirm(`Удалить документ ${number} из списка?`)) {
+        scannedItems.delete(number);
+        updateCounters();
+
+        // Удаляем строку из таблицы
+        const rows = inventoryTable.getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const numCell = rows[i].querySelector('.inventory-number');
+            if (numCell && numCell.textContent === number) {
+                inventoryTable.removeChild(rows[i]);
+                break;
+            }
+        }
+    }
+}
+
+    // Очистка всех номеров
+    function clearAll() {
+        if (scannedItems.size > 0 && confirm('Вы уверены, что хотите очистить список?')) {
+            scannedItems.clear();
+            inventoryTable.innerHTML = '';
+            updateCounters();
+            numberInput.focus();
+        }
+    }
+
+    // Обновление счетчиков
+    function updateCounters() {
+        itemsCount.textContent = scannedItems.size;
+        totalScanned.textContent = scannedItems.size;
+    }
+
+    // Открытие модального окна экспорта
+    function openExportModal() {
+        if (scannedItems.size === 0) {
+            alert('Нет данных для экспорта');
+            return;
+        }
+        exportModal.classList.add('active');
+    }
+
+    // Закрытие модального окна экспорта
+    function closeExportModal() {
+        exportModal.classList.remove('active');
+    }
+
+    // Открытие модального окна дубликата
+    function openDuplicateModal() {
+        duplicateModal.classList.add('active');
+    }
+
+    // Закрытие модального окна дубликата
+    function closeDuplicateModal() {
+        duplicateModal.classList.remove('active');
+        numberInput.value = '';
+        numberInput.focus();
+    }
+
+    // Экспорт данных
+    function exportData() {
+    const format = document.querySelector('input[name="export-format"]:checked').value;
+    const contentType = document.querySelector('input[name="export-content"]:checked').value;
+    let content = '';
+    let mimeType = '';
+    let fileName = 'inventory_export_' + new Date().toISOString().slice(0, 10);
+
+    // Добавляем BOM для UTF-8
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+
+    switch(format) {
+        case 'csv':
+            if (contentType === 'full') {
+                content = 'Штрих-код;Название документа\n';
+                scannedItems.forEach((title, number) => {
+                    content += `${number};"${title}"\n`;
+                });
+            } else {
+                content = 'Штрих-код\n';
+                scannedItems.forEach((_, number) => {
+                    content += `${number}\n`;
+                });
+            }
+            mimeType = 'text/csv;charset=UTF-8';
+            fileName += '.csv';
+            break;
+        case 'txt':
+            if (contentType === 'full') {
+                scannedItems.forEach((title, number) => {
+                    content += `${number} - ${title}\n`;
+                });
+            } else {
+                scannedItems.forEach((_, number) => {
+                    content += `${number}\n`;
+                });
+            }
+            mimeType = 'text/plain;charset=UTF-8';
+            fileName += '.txt';
+            break;
+        case 'json':
+            if (contentType === 'full') {
+                const itemsArray = Array.from(scannedItems).map(([number, title]) => ({ number, title }));
+                content = JSON.stringify(itemsArray, null, 2);
+            } else {
+                const numbersArray = Array.from(scannedItems.keys());
+                content = JSON.stringify(numbersArray, null, 2);
+            }
+            mimeType = 'application/json;charset=UTF-8';
+            fileName += '.json';
+            break;
+    }
+
+    // Создаем Blob с BOM для UTF-8
+    const blob = new Blob([bom, content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    closeExportModal();
+}
+
+    // Функция проверки штрих-кода
+    function checkBarcode() {
+        if (duplicateNumber) {
+            const encodedBarcode = encodeURIComponent(duplicateNumber);
+            const checkUrl = `https://opac.rounb.ru/cgiopac/opacg/opac.exe?arg0=libr&arg1=12345&_searchstr=%2Fopacg%2Ffreesearch2.html%3Fiddb%3D1%26value%3DIN+${encodedBarcode}%27%27&TypeAccess=PayAccess`;
+
+            window.open(checkUrl, '_blank');
+
+            closeDuplicateModal();
+            numberInput.value = '';
+            numberInput.focus();
+        }
+    }
+
+    // Обработчики событий
+    addButton.addEventListener('click', addNumber);
+    clearButton.addEventListener('click', clearAll);
+    exportButton.addEventListener('click', openExportModal);
+
+    numberInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addNumber();
+        }
+    });
+
+    // Автоматическое добавление при сканировании (если сканер добавляет Enter)
+    numberInput.addEventListener('input', (e) => {
+        if (autoScanToggle.checked && numberInput.value.includes('\n')) {
+            const number = numberInput.value.replace('\n', '').trim();
+            if (number) {
+                numberInput.value = number;
+                addNumber();
+            }
+        }
+    });
+
+    // Фокус на поле ввода при загрузке
+    window.addEventListener('load', () => {
+        numberInput.focus();
+    });
+
+    function logout() {
+        localStorage.removeItem('institutionKey');
+        localStorage.removeItem('institutionName');
+        window.location.href = 'login.html';
+    }
+</script>
+
+
+</body>
+<style>
+    /* Стили для таблицы инвентаризации */
+    .inventory-table-container {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--card-bg);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px var(--shadow-color);
+    }
+
+    .inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .inventory-table th {
+        background: var(--menu-item-bg);
+        color: var(--text-color);
+        padding: 12px 15px;
+        text-align: left;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .inventory-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+        cursor: pointer;
+    }
+
+    .inventory-table tr:hover {
+        background: var(--menu-item-hover);
+    }
+
+    .inventory-number {
+        font-weight: bold;
+        color: var(--primary-color);
+        width: 25%;
+    }
+
+    .document-title {
+        width: 75%;
+        word-break: break-word;
+    }
+
+    /* Стили для индикатора загрузки */
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        margin: 20px auto;
+        border: 4px solid var(--menu-item-bg);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Стили для выбора базы данных */
+.database-selector {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.database-label {
+    margin-right: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+
+    .database-select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    min-width: 180px; /* Даем больше места для описания */
+    max-width: 180px;
+}
+
+.database-select option {
+    padding: 8px;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.database-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+    .delete-btn {
+    background: none;
+    border: none;
+    color: var(--error-color, #ff4444);
+    font-size: 20px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0 auto;
+}
+
+.delete-btn:hover {
+    background-color: rgba(255, 68, 68, 0.1);
+}
+</style>
+</html>

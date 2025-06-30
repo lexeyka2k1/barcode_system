@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Руководство пользователя - СИУБФ</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+    <style>
+        .guide-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .guide-section {
+            margin-bottom: 40px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+        
+        .guide-section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .step-list {
+            padding-left: 20px;
+        }
+        
+        .step-list li {
+            margin-bottom: 10px;
+        }
+        
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: var(--menu-item-bg);
+            padding: 15px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .feature-card h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        
+        .screenshot {
+            max-width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .note {
+            background-color: var(--menu-item-hover);
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .warning {
+            background-color: rgba(255, 213, 0, 0.2);
+            padding: 15px;
+            border-left: 4px solid #ffd500;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .toc {
+    background: var(--menu-item-bg);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.toc h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.5em;
+}
+
+.toc ul {
+    columns: 1;
+    padding-left: 20px;
+    list-style-type: none;
+    margin: 15px 0 0 0;
+}
+
+.toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    break-inside: avoid;
+}
+
+.toc a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-block;
+    padding: 2px 0;
+}
+
+.toc a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.toc ul ul {
+    columns: 1;
+    padding-left: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.toc ul ul li {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.toc ul ul li::before {
+    content: "•";
+    color: var(--primary-color);
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+@media (max-width: 768px) {
+    .toc ul {
+        columns: 1;
+    }
+    
+    .toc ul ul {
+        padding-left: 20px;
+    }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <ul class="menu">
+                <!-- Меню будет заполнено через JavaScript -->
+            </ul>
+        </nav>
+        
+        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        
+        <main class="content">
+            <div class="header">
+                <h1>Руководство пользователя СИУБФ</h1>
+                <p>Полное описание функционала системы маркировки и инвентаризации</p>
+            </div>
+            
+            <div class="guide-container">
+                <div class="toc">
+                    <h2>Содержание</h2>
+                    <ul>
+                        <li><a href="#intro">1. Введение</a></li>
+                        <li><a href="#auth">2. Авторизация</a></li>
+                        <li><a href="#main">3. Главная страница</a></li>
+                        <li><a href="#marking">4. Маркировка документов</a>
+                            <ul>
+                                <li><a href="#auto-marking">4.1 Автоматическая маркировка</a></li>
+                                <li><a href="#manual-marking">4.2 Ручная маркировка</a></li>
+                                <li><a href="#printing">4.3 Печать штрих-кодов</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#inventory">5. Инвентаризация</a></li>
+                        <li><a href="#personnel">6. Управление персоналиями</a></li>
+                        <li><a href="#settings">7. Настройки системы</a></li>
+                        <li><a href="#support">8. Техническая поддержка</a></li>
+                    </ul>
+                </div>
+                
+                <section id="intro" class="guide-section">
+                    <h2>1. Введение</h2>
+                    <p>СИУБФ (Система идентификации для управления библиотечными фондами) — это система для автоматизированной маркировки документов и проведения инвентаризации библиотечных фондов с использованием штрих-кодов. Система позволяет:</p>
+                    <ul class="step-list">
+                        <li>Генерировать уникальные штрих-коды для документов</li>
+                        <li>Печатать стикеры со штрих-кодами</li>
+                        <li>Проводить инвентаризацию с помощью сканера штрих-кодов</li>
+                        <li>Управлять учетными записями пользователей</li>
+                        <li>Настраивать интерфейс под индивидуальные потребности</li>
+                    </ul>
+                    
+                    <div class="note">
+                        <strong>Системные требования:</strong> Для работы с СИУБФ требуется современный веб-браузер (Chrome, Firefox, Edge, Safari) и подключение к интернету.
+                    </div>
+                </section>
+                
+                <section id="auth" class="guide-section">
+                    <h2>2. Авторизация в системе</h2>
+                    <p>Для доступа к системе необходимо авторизоваться с помощью учетных данных.</p>
+                    
+                    <ol class="step-list">
+                        <li>Откройте страницу авторизации</li>
+                        <li>Введите ваш логин в поле "Логин"</li>
+                        <li>Введите пароль в поле "Пароль"</li>
+                        <li>Нажмите кнопку "Войти"</li>
+                    </ol>
+                    
+                    <div class="warning">
+                        <strong>Важно:</strong> Не передавайте свои учетные данные третьим лицам. В случае утери пароля обратитесь к администратору системы.
+                    </div>
+                    
+                    <p>После успешной авторизации вы будете перенаправлены на главную страницу системы.</p>
+                </section>
+                
+                <section id="main" class="guide-section">
+                    <h2>3. Главная страница</h2>
+                    <p>Главная страница содержит обзор возможностей системы и быстрый доступ к основным функциям:</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>Быстрый старт</h3>
+                            <p>Краткое руководство для начала работы с системой, включающее основные шаги:</p>
+                            <ol class="step-list">
+                                <li>Авторизация</li>
+                                <li>Выбор раздела</li>
+                                <li>Начало работы</li>
+                                <li>Использование справочников</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Быстрые действия</h3>
+                            <p>Кнопки для быстрого перехода к основным функциям:</p>
+                            <ul class="step-list">
+                                <li>Перейти к маркировке</li>
+                                <li>Перейти к инвентаризации</li>
+                                <li>Открыть документацию</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <p>Главная страница также содержит описание всех основных модулей системы с краткими инструкциями по их использованию.</p>
+                </section>
+                
+                <section id="marking" class="guide-section">
+                    <h2>4. Маркировка документов</h2>
+                    <p>Модуль маркировки позволяет создавать и печатать штрих-коды для документов. Доступно два режима работы:</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>Автоматическое формирование</h3>
+                            <p>Система генерирует последовательность штрих-кодов по заданным параметрам:</p>
+                            <ul class="step-list">
+                                <li>Начальный код</li>
+                                <li>Конечный код</li>
+                                <li>Количество штрих-кодов</li>
+                                <li>Количество страниц</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Ручное формирование</h3>
+                            <p>Возможность ввода отдельных инвентарных номеров для печати:</p>
+                            <ul class="step-list">
+                                <li>Ввод номеров вручную</li>
+                                <li>Проверка на дубликаты</li>
+                                <li>Удаление ошибочных номеров</li>
+                                <li>Печать до 40 номеров на листе</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3 id="auto-marking">4.1 Автоматическая маркировка</h3>
+                    <p>Для автоматического формирования штрих-кодов:</p>
+                    <ol class="step-list">
+                        <li>Выберите библиотеку из списка (если доступно)</li>
+                        <li>Система автоматически заполнит начальный код и количество</li>
+                        <li>При необходимости измените параметры:
+                            <ul>
+                                <li>Начальный код (7 цифр)</li>
+                                <li>Конечный код (рассчитывается автоматически)</li>
+                                <li>Количество страниц (1 страница = 40 штрих-кодов)</li>
+                            </ul>
+                        </li>
+                        <li>Нажмите "Печать штрих-кодов" для перехода к предпросмотру</li>
+                    </ol>
+                    
+                    <h3 id="manual-marking">4.2 Ручная маркировка</h3>
+                    <p>Для ручного ввода штрих-кодов:</p>
+                    <ol class="step-list">
+                        <li>Введите инвентарный номер в поле ввода</li>
+                        <li>Нажмите "Добавить" или клавишу Enter</li>
+                        <li>При обнаружении дубликата система предложит варианты действий</li>
+                        <li>Для удаления номера нажмите × на соответствующей карточке</li>
+                        <li>Для очистки всего списка нажмите "Очистить все"</li>
+                        <li>Когда список готов, нажмите "Печать"</li>
+                    </ol>
+                    
+                    <div class="note">
+                        <strong>Примечание:</strong> Максимальное количество штрих-кодов на одном листе — 40. При добавлении меньшего количества на листе останутся пустые места.
+                    </div>
+                    
+                    <h3 id="printing">4.3 Печать штрих-кодов</h3>
+                    <p>После формирования списка штрих-кодов:</p>
+                    <ol class="step-list">
+                        <li>Система отобразит предпросмотр страницы печати</li>
+                        <li>Каждый штрих-код будет представлен в виде:
+                            <ul>
+                                <li>Графического изображения штрих-кода (Code39)</li>
+                                <li>Текстового представления номера</li>
+                            </ul>
+                        </li>
+                        <li>Проверьте корректность данных</li>
+                        <li>Нажмите "Печать" для отправки на принтер</li>
+                        <li>Используйте "Назад" для возврата к редактированию</li>
+                    </ol>
+                    
+                    <div class="warning">
+                        <strong>Рекомендация:</strong> Перед массовой печатью сделайте пробный оттиск для проверки качества и правильности штрих-кодов.
+                    </div>
+                </section>
+                
+                <section id="inventory" class="guide-section">
+                    <h2>5. Инвентаризация</h2>
+                    <p>Модуль инвентаризации позволяет проводить учет документов с помощью сканера штрих-кодов или ручного ввода.</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>Режимы сканирования</h3>
+                            <p>Доступны два режима работы:</p>
+                            <ul class="step-list">
+                                <li><strong>Автоматический:</strong> добавление номера сразу после сканирования (если сканер отправляет Enter)</li>
+                                <li><strong>Ручной:</strong> требуется нажатие кнопки "Добавить" после сканирования</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Управление списком</h3>
+                            <p>Работа с отсканированными номерами:</p>
+                            <ul class="step-list">
+                                <li>Просмотр всех отсканированных номеров</li>
+                                <li>Удаление ошибочных номеров (кнопка ×)</li>
+                                <li>Очистка всего списка</li>
+                                <li>Экспорт данных в различные форматы</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <p>Инструкция по проведению инвентаризации:</p>
+                    <ol class="step-list">
+                        <li>Выберите режим сканирования (автоматический/ручной)</li>
+                        <li>Выберите базу данных, если их доступно несколько</li>
+                        <li>Сканируйте штрих-коды документов или вводите номера вручную</li>
+                        <li>Система автоматически подсчитывает количество отсканированных документов</li>
+                        <li>При обнаружении дубликата система предложит проверить штрих-код</li>
+                        <li>Для удаления номера нажмите × на соответствующей карточке</li>
+                        <li>По окончании инвентаризации нажмите "Экспорт" для сохранения результатов</li>
+                    </ol>
+                    
+                    <h3>Экспорт данных</h3>
+                    <p>Результаты инвентаризации можно экспортировать в трех форматах:</p>
+                    <ol class="step-list">
+                        <li><strong>CSV (Excel):</strong> для дальнейшей обработки в табличных редакторах</li>
+                        <li><strong>Текстовый файл:</strong> простой список номеров</li>
+                        <li><strong>JSON:</strong> структурированные данные для интеграции с другими системами</li>
+                    </ol>
+                    
+                    <div class="note">
+                        <strong>Совет:</strong> Для быстрой проверки документа кликните по его номеру в списке — система откроет информацию о документе в новом окне в АБИС OPAC-Global.
+                    </div>
+                </section>
+                
+                <section id="personnel" class="guide-section">
+                    <h2>6. Управление персоналиями</h2>
+                    <p>Модуль управления пользователями доступен только администраторам системы и позволяет:</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>Регистрация новых пользователей</h3>
+                            <p>Создание учетных записей с указанием:</p>
+                            <ul class="step-list">
+                                <li>Наименования пользователя</li>
+                                <li>Уникального идентификатора</li>
+                                <li>Пароля</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Просмотр пользователей</h3>
+                            <p>Управление существующими учетными записями:</p>
+                            <ul class="step-list">
+                                <li>Поиск пользователей</li>
+                                <li>Редактирование данных</li>
+                                <li>Блокировка/удаление</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <p>Для регистрации нового пользователя:</p>
+                    <ol class="step-list">
+                        <li>Перейдите в раздел "Персоналии"</li>
+                        <li>Выберите "Зарегистрировать нового пользователя"</li>
+                        <li>Заполните все поля формы:
+                            <ul>
+                                <li>Наименование пользователя</li>
+                                <li>Уникальный идентификатор</li>
+                                <li>Пароль</li>
+                            </ul>
+                        </li>
+                        <li>Нажмите "Зарегистрировать"</li>
+                    </ol>
+                    
+                    <div class="warning">
+                        <strong>Важно:</strong> Администратор должен сообщить пользователю его учетные данные.
+                    </div>
+                </section>
+                
+                <section id="settings" class="guide-section">
+                    <h2>7. Настройки системы</h2>
+                    <p>Модуль настроек позволяет персонализировать интерфейс системы под индивидуальные потребности.</p>
+                    
+                    <h3>Доступные настройки:</h3>
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>Цветовая тема</h3>
+                            <p>Переключение между светлой и темной темой интерфейса</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Анимация элементов</h3>
+                            <p>Включение/отключение анимации интерфейсных элементов</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Режимы доступности</h3>
+                            <p>Специальные режимы для пользователей с ограниченными возможностями:
+                                <ul class="step-list">
+                                    <li>Высококонтрастный режим</li>
+                                    <li>Черно-белый режим</li>
+                                </ul>
+                            </p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>Размер текста</h3>
+                            <p>Увеличение/уменьшение размера шрифта интерфейса</p>
+                        </div>
+                    </div>
+                    
+                    <p>Все изменения настроек применяются мгновенно и сохраняются для последующих сеансов работы.</p>
+                    
+                    <div class="note">
+                        <strong>Примечание:</strong> Настройки сохраняются в браузере, поэтому при смене устройства или браузера потребуется повторная настройка.
+                    </div>
+                </section>
+                
+                <section id="support" class="guide-section">
+                    <h2>8. Техническая поддержка</h2>
+                    <p>Если у вас возникли вопросы или проблемы при работе с системой:</p>
+                    
+                    <ul class="step-list">
+                        <li>Свяжитесь с <strong>технической поддержкой</strong> по email: oka@rounb.ru</li>
+                    </ul>
+                    
+                    <p>При обращении в поддержку укажите:</p>
+                    <ol class="step-list">
+                        <li>Версию вашего браузера</li>
+                        <li>Описание проблемы или вопроса</li>
+                        <li>Шаги, которые привели к возникновению проблемы</li>
+                        <li>Скриншоты (если возможно)</li>
+                    </ol>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="setting.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        window.location.href = 'login.html';
+        return;
+    }
+    });
+
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+           function logout() {
+    // Очищаем все данные авторизации
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+
+    // Перенаправляем на страницу входа
+    window.location.href = 'login.html';
+}
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Главная - Сервис штрихкодирования</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+    <style>
+        /* Добавляем стили для кнопки авторизации */
+        .auth-button {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .auth-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Убираем отступы для контента, так как нет бокового меню */
+        .content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        /* Центрируем заголовок */
+        .header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Адаптация для мобильных устройств */
+        @media (max-width: 768px) {
+            .auth-button {
+                top: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Кнопка авторизации в правом верхнем углу -->
+    <button class="auth-button" onclick="window.location.href='login.html'">Войти</button>
+
+    <main class="content">
+        <div class="header">
+            <h1>Сервис штрихкодирования и инвентаризации</h1>
+            <p>Добро пожаловать!</p>
+        </div>
+
+        <div class="guide-container">
+            <section class="guide-section">
+                <h2>📌 Быстрый старт</h2>
+                <p>Краткое руководство для начала работы с системой:</p>
+                <ol class="step-list">
+                    <li><strong>Авторизуйтесь</strong> в системе используя свои учетные данные</li>
+                    <li><strong>Выберите раздел</strong> в соответствии с вашими задачами</li>
+                    <li><strong>Начните работу</strong> с создания штрих-кодов или проведения инвентаризации</li>
+                    <li><strong>Используйте справочники</strong> для управления базой данных оборудования</li>
+                </ol>
+
+                <div class="quick-actions">
+                    <button class="primary" onclick="window.location.href='login.html'">Войти в систему</button>
+                    <button onclick="window.location.href='manual.html'">Документация</button>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <section class="guide-section">
+                <h2>🏷️ Маркировка оборудования</h2>
+                <p>Создание и управление штрих-кодами для учета активов:</p>
+
+                <div class="feature-cards">
+                    <div class="feature-card">
+                        <h3>📝 Создание кодов</h3>
+                        <p>Генерация уникальных штрихкодов с автоматическим или ручным присвоением инвентарных номеров</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🖨️ Печать меток</h3>
+                        <p>Формирование и печать стикеров со штрих-кодами в различных форматах</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📁 База данных</h3>
+                        <p>Хранение полной информации о каждом помеченном объекте с возможностью поиска и фильтрации</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="guide-section">
+                <h2>📋 Инвентаризация</h2>
+                <p>Проведение учета и сверки оборудования:</p>
+
+                <div class="feature-cards">
+                    <div class="feature-card">
+                        <h3>📱 Сканирование</h3>
+                        <p>Возможность проведения инвентаризации с помощью сканера штрих-кодов и компьютера</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Отчеты</h3>
+                        <p>Формирование отчетов по результатам инвентаризации в различных форматах</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔍 Поиск документа</h3>
+                        <p>Автоматическое отображение наименования считанного документа по штрих-коду</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="guide-section">
+                <h2>❓ Помощь и поддержка</h2>
+                <p>Если у вас возникли вопросы или проблемы:</p>
+                <ul class="step-list">
+                    <li>Обратитесь к <strong>полной документации</strong> системы</li>
+                    <li>Свяжитесь с <strong>технической поддержкой</strong> по email: support@barcode-service.ru</li>
+                    <li>Или позвоните по телефону: <strong>8-800-123-45-67</strong></li>
+                </ul>
+            </section>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Упрощенный скрипт для темы (без меню)
+    const settings = {
+        theme: 'light',
+        animation: true,
+        contrast: false,
+        grayscale: false,
+        fontSize: 1
+    };
+
+    function applySettings() {
+        document.body.classList.toggle('high-contrast', settings.contrast);
+        document.body.classList.toggle('grayscale', settings.grayscale);
+        document.documentElement.style.setProperty('--animation-duration', settings.animation ? '0.3s' : '0s');
+        document.body.style.fontSize = `${settings.fontSize}em`;
+        localStorage.setItem('appSettings', JSON.stringify(settings));
+    }
+
+    // Загрузка сохраненных настроек
+    function loadSettings() {
+        const savedSettings = localStorage.getItem('appSettings');
+        if (savedSettings) {
+            Object.assign(settings, JSON.parse(savedSettings));
+            applySettings();
+        }
+    }
+
+    // Инициализация при загрузке
+    window.addEventListener('DOMContentLoaded', () => {
+        loadSettings();
+    });
+</script>
+</body>
+</html>

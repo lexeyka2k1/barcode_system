@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Автоматическая маркировка - OPAC-Global</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+  
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <ul class="menu">
+                <!-- Меню будет заполнено через JavaScript -->
+            </ul>
+        </nav>
+        
+        <button class="menu-button" onclick="toggleMenu()">☰</button>
+        
+        <main class="content">
+            <div class="header">
+                <h1>Автоматическая маркировка</h1>
+                <p>Генерация штрих-кодов по заданным параметрам</p>
+            </div>
+            
+            <div class="auto-marking-container">
+               
+                
+                <div class="auto-form-container">
+                    <form id="code">
+                        <table class="auto-form-table">
+                            <tr>
+                                <td><label for="id">Идентификатор:</label></td>
+                                <td><input type="text" id="id" name="id" readonly></td>
+                            </tr>
+                            <tr>
+                                <td><label for="kod1">Начальный код:</label></td>
+                                <td><input type="text" id="kod1" name="kod1" maxlength="7"></td>
+                            </tr>
+                            <tr>
+                                <td><label for="kod2">Конечный код:</label></td>
+                                <td><input type="text" id="kod2" name="kod2" readonly> </td>
+                            </tr>
+                            <tr>
+                                <td><label for="kol">Количество штрих-кодов:</label></td>
+                                <td><input type="text" id="kol" name="kol" readonly></td>
+                            </tr>
+                            <tr>
+                                <td><label for="kol_str">Количество страниц:</label></td>
+                                <td><input type="text" id="kol_str" name="kol_str" readonly></td>
+                            </tr>
+                        </table>
+                        
+                        <div class="auto-form-actions">
+                        <!--    <button type="button" onclick="refreshPage()" class="auto-form-button secondary">Обновить</button> -->
+                            <button type="button" onclick="printBarcodes()" class="auto-form-button primary">Печать штрих-кодов</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="setting.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Элементы формы
+    const idField = document.getElementById('id');
+    const kod1Field = document.getElementById('kod1');
+    const kod2Field = document.getElementById('kod2');
+    const kolField = document.getElementById('kol');
+    const kolStrField = document.getElementById('kol_str');
+
+    // Устанавливаем ID учреждения
+    idField.value = institutionKey;
+
+    // Восстанавливаем последние значения или устанавливаем по умолчанию
+    const lastEndCode = localStorage.getItem('lastEndCode');
+    const defaultStart = '000001';
+
+    kod1Field.value = lastEndCode
+        ? String(Number(lastEndCode) + 1).padStart(7, '0')
+        : defaultStart;
+
+    // Автоматический расчет
+    const calculateFields = () => {
+        const startNum = Number(kod1Field.value);
+        const count = 40; // Фиксированное количество кодов
+        const endNum = startNum + count - 1;
+
+        kod2Field.value = String(endNum).padStart(7, '0');
+        kolField.value = count;
+        kolStrField.value = '1'; // Фиксированно 1 страница
+    };
+
+    // Обработчики событий
+    kod1Field.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 7);
+        calculateFields();
+    });
+
+    kolStrField.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^\d.]/g, '');
+    });
+
+    // Первоначальный расчет
+    calculateFields();
+});
+
+function printBarcodes() {
+    const institutionKey = localStorage.getItem('institutionKey');
+    const startCode = document.getElementById('kod1').value;
+    const count = 40;
+
+    // Генерируем номера для печати
+    const numbers = [];
+    for (let i = 0; i < count; i++) {
+        const num = Number(startCode) + i;
+        const fullCode = institutionKey + String(num).padStart(7, '0');
+        numbers.push(fullCode);
+    }
+
+    // Сохраняем последний использованный код
+    localStorage.setItem('lastEndCode', String(Number(startCode) + count - 1));
+
+    // Открываем страницу печати
+    window.open(`print-preview.html?numbers=${encodeURIComponent(JSON.stringify(numbers))}`, '_blank');
+}
+
+function refreshPage() {
+    window.location.reload();
+}
+
+        function logout() {
+    // Очищаем все данные авторизации
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+
+    // Перенаправляем на страницу входа
+    window.location.href = 'login.html';
+}
+    </script>
+</body>
+</html>

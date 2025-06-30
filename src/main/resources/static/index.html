@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+  <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Главная - Сервис штрихкодирования</title>
+    <link rel="stylesheet" href="styles.css" id="main-style">
+    <link rel="stylesheet" href="light-styles.css" id="light-theme" disabled>
+    <link rel="stylesheet" href="grayscale.css" id="grayscale-style" disabled>
+    <link rel="stylesheet" href="high-contrast.css" id="high-contrast-style" disabled>
+</head>
+<body>
+<div class="container">
+    <nav class="sidebar" id="sidebar">
+        <ul class="menu">
+            <!-- Меню будет заполнено через JavaScript -->
+        </ul>
+    </nav>
+
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+    
+        <main class="content">
+            <div class="header">
+                <h1>Сервис штрихкодирования и инвентаризации</h1>
+                <p>Добро пожаловать!</p>
+            </div>
+            
+            <div class="guide-container">
+                <section class="guide-section">
+                    <h2>📌 Быстрый старт</h2>
+                    <p>Краткое руководство для начала работы с системой:</p>
+                    <ol class="step-list">
+                        <li><strong>Авторизуйтесь</strong> в системе используя свои учетные данные</li>
+                        <li><strong>Выберите раздел</strong> в боковом меню в соответствии с вашими задачами</li>
+                        <li><strong>Начните работу</strong> с создания штрих-кодов или проведения инвентаризации</li>
+                        <li><strong>Ознакомьтесь с документацией</strong> при необходимости</li>
+                    </ol>
+                    
+                    <div class="quick-actions">
+                        <button class="primary" onclick="window.location.href='marking.html'">Перейти к маркировке</button>
+						<button class="primary" onclick="window.location.href='inventory.html'">Перейти к инвентаризации</button>
+                        <button onclick="window.location.href='manual.html'">Документация</button>
+                    </div>
+                </section>
+                
+                <div class="divider"></div>
+                
+                <section class="guide-section">
+                    <h2>🏷️ Маркировка документов</h2>
+                    <p>Создание и управление штрих-кодами для учета активов:</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>📝 Создание кодов</h3>
+                            <p>Генерация уникальных штрихкодов с автоматическим или ручным присвоением инвентарных номеров</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>🖨️ Печать меток</h3>
+                            <p>Формирование и печать стикеров со штрих-кодами в различных форматах</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>📁 База данных</h3>
+                            <p>Хранение полной информации о каждом помеченном объекте с возможностью поиска и фильтрации</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="guide-section">
+                    <h2>📋 Инвентаризация</h2>
+                    <p>Проведение учета и сверки документов:</p>
+                    
+                    <div class="feature-cards">
+                        <div class="feature-card">
+                            <h3>📱 Сканирование</h3>
+                            <p>Возможность проведения инвентаризации с помощью сканера штрих-кодов и компьютера</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>📊 Отчеты</h3>
+                            <p>Формирование отчетов по результатам инвентаризации в различных форматах</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>🔍 Поиск документа</h3>
+                            <p>Автоматическое отображение наименования считанного документа по штрих-коду</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="guide-section">
+                    <h2>❓ Помощь и поддержка</h2>
+                    <p>Если у вас возникли вопросы или проблемы:</p>
+                    <ul class="step-list">
+                        <li>Обратитесь к <strong>полной документации</strong> системы</li>
+                        <li>Свяжитесь с <strong>технической поддержкой</strong> по email: oka@rounb.ru</li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="setting.js"></script>
+    <script>
+
+        function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const institutionKey = localStorage.getItem('institutionKey');
+    if (!institutionKey) {
+        window.location.href = 'login.html';
+        return;
+    }
+    });
+
+           function logout() {
+    // Очищаем все данные авторизации
+    localStorage.removeItem('institutionKey');
+    localStorage.removeItem('institutionName');
+
+    // Перенаправляем на страницу входа
+    window.location.href = 'login.html';
+}
+
+    </script>
+</body>
+</html>
